@@ -1,4 +1,3 @@
-import 'package:fast_app_base/common/data/memory/todo_data_holder.dart';
 import 'package:fast_app_base/common/theme/custom_theme.dart';
 import 'package:fast_app_base/common/theme/custom_theme_holder.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +44,4 @@ extension ContextExtension on BuildContext {
   CustomTheme get themeType => CustomThemeHolder.of(this).theme;
 
   Function(CustomTheme) get changeTheme => CustomThemeHolder.of(this).changeTheme;
-
-  TodoDataHolder get holder => TodoDataHolder.of(this);
 }

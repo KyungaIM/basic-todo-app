@@ -34,7 +34,6 @@ class _WriteTodoDialogState extends State<WriteTodoDialog>
       textController.text = widget.editValue!.title;
       _selectedDate = widget.editValue!.dueDate;
     }
-
   }
 
   @override
