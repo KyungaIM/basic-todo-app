@@ -75,6 +75,7 @@ dependencies:
   json_annotation: ^4.8.0
   rive: ^0.13.9
   flutter_bloc: ^8.1.6
+  flutter_riverpod: ^2.5.1
 
 dev_dependencies:
   flutter_test:
