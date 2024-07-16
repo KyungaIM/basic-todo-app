@@ -1,5 +1,7 @@
 import 'package:fast_app_base/common/data/memory/todo_status.dart';
 import 'package:fast_app_base/common/data/memory/vo_todo.dart';
+import 'package:fast_app_base/data/local/local_db.dart';
+import 'package:fast_app_base/data/todo_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../screen/dialog/d_confirm.dart';
@@ -14,17 +16,21 @@ final todoDataProvider = StateNotifierProvider<TodoDataHolder, List<Todo>>((ref)
 
 class TodoDataHolder extends StateNotifier<List<Todo>> {
   TodoDataHolder():super([]);
+  final TodoRepository todoRepository = LocalDB.instance;
 
   void addTodo() async {
     final result = await WriteTodoDialog().show();
     if (result != null) {
-      state.add(Todo(
+      Todo todo = Todo(
           id: DateTime.now().microsecondsSinceEpoch,
           title: result.todo,
           dueDate: result.dateTime,
-          status: TodoStatus.incomplete));
-    }
+          status: TodoStatus.incomplete);
+
+      state.add(todo);
       state = List.of(state);
+      todoRepository.addTodo(todo);
+    }
   }
 
   void changeTodoStatus(Todo todo) async {
@@ -38,8 +44,9 @@ class TodoDataHolder extends StateNotifier<List<Todo>> {
         result?.runIfSuccess((data) {
           todo.status = TodoStatus.incomplete;
         });
-    }
     state = List.of(state);
+    todoRepository.updateTodo(todo);
+    }
   }
 
   void editTodo(Todo todo) async {
@@ -48,12 +55,14 @@ class TodoDataHolder extends StateNotifier<List<Todo>> {
       todo.title = result.todo;
       todo.dueDate = result.dateTime;
       state = List.of(state);
+      todoRepository.updateTodo(todo);
     }
   }
 
   void removeTodo(Todo todo) {
     state.remove(todo);
     state = List.of(state);
+    todoRepository.removeTodo(todo.id);
   }
 }
 
