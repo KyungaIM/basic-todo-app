@@ -4,5 +4,6 @@
   "clear_cache_done": "캐시가 삭제되었습니다.",
   "close": "닫기",
   "done": "완료",
-  "cancel": "취소"
+  "cancel": "취소",
+  "api_error": "서버에서 에러가 발생했습니다."
 }

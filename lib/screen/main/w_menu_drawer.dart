@@ -1,6 +1,4 @@
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:fast_app_base/common/data/memory/todo_data_holder.dart';
-import 'package:fast_app_base/screen/main/s_main.dart';
 import 'package:fast_app_base/screen/opensource/s_opensource.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +47,7 @@ class _MenuDrawerState extends ConsumerState<MenuDrawer> {
               decoration: BoxDecoration(
                   borderRadius: const BorderRadius.only(
                       topRight: Radius.circular(5), bottomRight: Radius.circular(5)),
-                  color: context.colors.background),
+                  color: context.colors.surface),
               child: isSmallScreen(context)
                   ? SingleChildScrollView(
                       child: getMenus(context),
@@ -91,14 +89,6 @@ class _MenuDrawerState extends ConsumerState<MenuDrawer> {
           ),
           const Height(10),
           const Line(),
-          _MenuWidget(
-            '유저 변경'.tr(),
-            onTap: () async {
-              final val = ref.refresh(userProvider);
-              debugPrint(val.value);
-              Nav.push(const MainScreen());
-            },
-          ),
           const Height(10),
           const Line(),
           _MenuWidget(
@@ -195,7 +185,7 @@ class _MenuDrawerState extends ConsumerState<MenuDrawer> {
                         }
                         await context.setLocale(Language.find(value.toLowerCase()).locale);
                       },
-                      value: describeEnum(currentLanguage).capitalizeFirst,
+                      value: currentLanguage.name.capitalizeFirst,
                       underline: const SizedBox.shrink(),
                       elevation: 1,
                       borderRadius: BorderRadius.circular(10),
@@ -209,12 +199,12 @@ class _MenuDrawerState extends ConsumerState<MenuDrawer> {
 
   DropdownMenuItem<String> menu(Language language) {
     return DropdownMenuItem(
-      value: describeEnum(language).capitalizeFirst,
+      value: language.name.capitalizeFirst,
       child: Row(
         children: [
           flag(language.flagPath),
           const Width(8),
-          describeEnum(language)
+          language.name
               .capitalizeFirst!
               .text
               .color(Theme.of(context).textTheme.bodyLarge?.color)
