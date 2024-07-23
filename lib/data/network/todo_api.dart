@@ -54,16 +54,8 @@ class TodoApi implements TodoRepository<ApiError> {
       Future<SimpleResult<T, ApiError>> Function() apiLogic) async {
     try {
       return await apiLogic();
-    } on DioException catch (e) {
-      return SimpleResult.failure(ApiError(
-        message: e.message ?? e.error?.toString() ??
-            'error message is not exist',
-        statusCode: e.response?.statusCode ?? 0
-      ));
     } catch (e) {
-      return SimpleResult.failure(ApiError(message: 'unknown error ${e.toString()}' ));
+      return ApiError.createErrorResult(e);
     }
   }
-
-
 }

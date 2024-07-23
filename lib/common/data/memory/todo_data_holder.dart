@@ -1,3 +1,4 @@
+import 'package:fast_app_base/common/data/memory/todo_state.dart';
 import 'package:fast_app_base/common/data/memory/todo_status.dart';
 import 'package:fast_app_base/common/data/memory/vo_todo.dart';
 import 'package:fast_app_base/data/network/todo_api.dart';
@@ -6,14 +7,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../screen/dialog/d_confirm.dart';
 import '../../../screen/main/write/d_write_todo.dart';
 
-final todoDataProvider = StateNotifierProvider<TodoDataHolder, List<Todo>>((ref){
+final todoDataProvider = StateNotifierProvider<TodoDataHolder, TodoState>((ref){
   return TodoDataHolder(TodoApi.instance);
 });
 
-class TodoDataHolder extends StateNotifier<List<Todo>> {
+class TodoDataHolder extends StateNotifier<TodoState> {
   final TodoApi todoRepository;
+  late final bool loading;
 
-  TodoDataHolder(this.todoRepository) : super([]) {
+  TodoDataHolder(this.todoRepository) : super(TodoState(loading: true, todos: [])) {
     _init();
   }
 
@@ -21,12 +23,14 @@ class TodoDataHolder extends StateNotifier<List<Todo>> {
     try {
       final requestResult = await todoRepository.getTodoList();
       requestResult.runIfSuccess((data) {
-        state = data;
+        state = TodoState(loading: false, todos: data);
       });
       requestResult.runIfFailure((error) {
+        state = TodoState(loading: false, todos: []);
         MessageDialog(error.message).show();
       });
     } catch (e) {
+      state = TodoState(loading: false, todos: []);
       MessageDialog(e.toString()).show();
     }
   }
@@ -41,11 +45,10 @@ class TodoDataHolder extends StateNotifier<List<Todo>> {
           title: result.todo,
           dueDate: result.dateTime,
           status: TodoStatus.incomplete);
-
       final requestResult = await todoRepository.addTodo(todo);
       requestResult.runIfSuccess((data) {
-        state.add(todo);
-        state = List.of(state);
+        final updateTodos = List<Todo>.from(state.todos)..add(todo);
+        state = TodoState(loading: false, todos: updateTodos);
       });
       requestResult.runIfFailure((error) => MessageDialog(error.message).show());
     }}
@@ -61,13 +64,14 @@ class TodoDataHolder extends StateNotifier<List<Todo>> {
           result?.runIfSuccess((data) {
             todo.status = TodoStatus.incomplete;
           });
-
+        break;
+      }
           final requestResult = await todoRepository.updateTodo(todo);
           requestResult.runIfSuccess((data) {
-            state = List.of(state);
+            final updatedTodos = state.todos.map((t) => t.id == todo.id ? todo : t).toList();
+            state = TodoState(loading: false, todos: updatedTodos);
           });
           requestResult.runIfFailure((error) => MessageDialog(error.message).show());
-      }
     }
 
     void editTodo(Todo todo) async {
@@ -78,18 +82,18 @@ class TodoDataHolder extends StateNotifier<List<Todo>> {
 
         final requestResult = await todoRepository.updateTodo(todo);
         requestResult.runIfSuccess((data) {
-          state = List.of(state);
+          final updatedTodos = state.todos.map((t) => t.id == todo.id ? todo : t).toList();
+          state = TodoState(loading: false, todos: updatedTodos);
         });
         requestResult.runIfFailure((error) => MessageDialog(error.message).show());
       }
     }
 
     void removeTodo(Todo todo) async {
-      state.remove(todo);
-
       final requestResult = await todoRepository.removeTodo(todo.id);
       requestResult.runIfSuccess((data) {
-        state = List.of(state);
+        final updatedTodos = List<Todo>.from(state.todos)..remove(todo);
+        state = TodoState(loading: false, todos: updatedTodos);
       });
       requestResult.runIfFailure((error) => MessageDialog(error.message).show());
     }
